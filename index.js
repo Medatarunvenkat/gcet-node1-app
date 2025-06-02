@@ -28,5 +28,5 @@ const products = [
   { id: 3,name:"Product 3",price:300}
 ];
 app.get("/products",(req,res)=>{
-  res.send(products);
+ return res.json(products);
 })
