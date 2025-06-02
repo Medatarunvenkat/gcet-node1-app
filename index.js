@@ -5,9 +5,13 @@ app.listen(8080,()=>{
 });
 
 app.get("/",(req,res)=>{
-  return res.send("Hello Tarun");
+  return res.send("Hello GM");
 });
 
 app.get("/greet",(req,res)=>{
     return res.send("Hello Greetings");
+});
+
+app.get("/name",(req,res)=>{
+  return res.send("Hello Tarun");
 });
