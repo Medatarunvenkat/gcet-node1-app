@@ -63,6 +63,6 @@ app.get("/products",(req,res)=>{
 
 app.post("/register", async(req,resp)=>{
   const {name,email,pass}=req.body;
-    const res=await user.insertMany({name:name,email:email,pass:pass});  
+    const res=await user.insertMany({name,email,pass});  
     return resp.json(res);
 })
