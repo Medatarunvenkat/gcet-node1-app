@@ -3,10 +3,20 @@ const cors = require("cors");
 const mongoose=require("mongoose");
 const app = express();
 app.use(cors());
+app.use(express.json())
 app.listen(8080,()=>{
   mongoose.connect("mongodb://localhost:27017/gcet");
     console.log("Server Started on port 8080 and mongodb connected");
 });
+
+const userSchema=mongoose.Schema({
+  name:{type:String},
+  email:{type:String},
+  pass:{type:String},
+});
+
+const user=mongoose.model("User",userSchema);
+
 
 app.get("/", (req, res) => {
   const html = `
@@ -48,4 +58,11 @@ const products = [
 ];
 app.get("/products",(req,res)=>{
   return res.json(products);
+})
+
+
+app.post("/register", async(req,resp)=>{
+  const {name,email,pass}=req.body;
+    const res=await user.insertMany({name:name,email:email,pass:pass});  
+    return resp.json(res);
 })
