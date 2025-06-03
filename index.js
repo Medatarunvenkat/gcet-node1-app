@@ -7,7 +7,7 @@ app.listen(8080,()=>{
 });
 
 app.get("/",(req,res)=>{
-  return res.send("Hello GM");
+  return res.send("Hello Home");
 });
 
 app.get("/greet",(req,res)=>{
@@ -23,10 +23,10 @@ app.get("/weather",(req,res)=>{
 })
 
 const products = [
-  { id: 1,name:"Product 1",price:100},
+  { id: 1,name:"Product 1",price:900},
   { id: 2,name:"Product 2",price:200},
   { id: 3,name:"Product 3",price:300}
 ];
 app.get("/products",(req,res)=>{
- return res.json(products);
+  return res.json(products);
 })
