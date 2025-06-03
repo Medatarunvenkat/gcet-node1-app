@@ -1,13 +1,32 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose=require("mongoose");
 const app = express();
 app.use(cors());
 app.listen(8080,()=>{
-    console.log("Server Started on port 8080");
+  mongoose.connect("mongodb://localhost:27017/gcet");
+    console.log("Server Started on port 8080 and mongodb connected");
 });
 
-app.get("/",(req,res)=>{
-  return res.send("Hello Home");
+app.get("/", (req, res) => {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Node JS API's Routes</title>
+    </head>
+    <body>
+      <h1>Node JS API's Routes</h1>
+      <ul>
+        <li><a href="/greet">Greet</a></li>
+        <li><a href="/name">Name</a></li>
+        <li><a href="/weather">Weather</a></li>
+        <li><a href="/products">Products</a></li>
+      </ul>
+    </body>
+    </html>
+  `;
+  res.send(html);
 });
 
 app.get("/greet",(req,res)=>{
