@@ -51,14 +51,14 @@ app.get("/weather",(req,res)=>{
   return res.send("Weather is sunny 40 degrees");
 })
 
-const products = [
-  { id: 1,name:"Product 1",price:900},
-  { id: 2,name:"Product 2",price:200},
-  { id: 3,name:"Product 3",price:300}
-];
-app.get("/products",(req,res)=>{
-  return res.json(products);
-})
+// const products = [
+//   { id: 1,name:"Product 1",price:900},
+//   { id: 2,name:"Product 2",price:200},
+//   { id: 3,name:"Product 3",price:300}
+// ];
+// app.get("/products",(req,res)=>{
+//   return res.json(products);
+// })
 
 
 app.post("/register", async(req,resp)=>{
@@ -77,5 +77,25 @@ app.post("/login",async(req,resp)=>{
   else
   {
     return resp.json({"message":"Login UnSuccess"});
+  }
+})
+
+const productSchema=mongoose.Schema({
+  name:{type:String},
+  price:{type:Number},
+});
+
+const product=mongoose.model("Product",productSchema);
+
+app.post("/products",async(req,resp)=>{
+  const {name,price}=req.body;
+  const found=await product.findOne({name,price:Number(price)});
+  if(found)
+  {
+    return resp.json(found);
+  }
+  else
+  {
+    return resp.json({message:"Products not found"});
   }
 })
