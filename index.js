@@ -66,3 +66,16 @@ app.post("/register", async(req,resp)=>{
     const res=await user.insertMany({name,email,pass});  
     return resp.json(res);
 })
+
+app.post("/login",async(req,resp)=>{
+  const {email,pass}=req.body;
+  const found=await user.findOne({email,pass});
+  if(found)
+  {
+    return resp.json({"message":"Login Success"});
+  }
+  else
+  {
+    return resp.json({"message":"Login UnSuccess"});
+  }
+})
