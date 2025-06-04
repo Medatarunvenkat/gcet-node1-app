@@ -119,7 +119,13 @@ const MONGODB_URI=process.env.MONGODB_URI
 app.use("/users", userRouter);
 app.use("/products", productRouter);
 app.use("/order",orderRouter);
-app.listen(8080, () => {
-  mongoose.connect(`${MONGODB_URI}`);
-  console.log("Server Started");
-});
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    app.listen(8080, () => {
+      console.log("Server Started on port 8080");
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
