@@ -37,9 +37,29 @@ const userSchema = mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   pass: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model("User", userSchema);
+
+// Order Schema
+const orderSchema = mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  items: [{
+    productId: { type: String, required: true },
+    name: { type: String, required: true },
+    price: { type: Number, required: true },
+    quantity: { type: Number, required: true, default: 1 }
+  }],
+  totalAmount: { type: Number, required: true },
+  paymentMethod: { type: String, required: true },
+  paymentDetails: { type: Object },
+  deliveryAddress: { type: String, required: true },
+  orderDate: { type: Date, default: Date.now },
+  status: { type: String, default: 'Pending' }
+});
+
+const Order = mongoose.model("Order", orderSchema);
 
 // Register Route
 router.post("/register", async (req, res) => {
@@ -103,6 +123,91 @@ router.get("/", async (req, res) => {
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+// Create a new order
+router.post("/orders", async (req, res) => {
+  try {
+    const { userId, items, totalAmount, paymentMethod, paymentDetails, deliveryAddress } = req.body;
+    
+    // Validate required fields
+    if (!userId || !items || !totalAmount || !paymentMethod || !deliveryAddress) {
+      return res.status(400).json({ error: "Missing required order information" });
+    }
+    
+    // Validate user exists
+    const userExists = await User.findById(userId);
+    if (!userExists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Create new order
+    const newOrder = new Order({
+      userId,
+      items,
+      totalAmount,
+      paymentMethod,
+      paymentDetails: paymentMethod === 'card' ? 
+        // Remove sensitive card data
+        { 
+          cardNumber: paymentDetails.cardNumber ? 
+            `xxxx-xxxx-xxxx-${paymentDetails.cardNumber.slice(-4)}` : '',
+          cardHolderName: paymentDetails.cardHolderName,
+          expiryDate: paymentDetails.expiryDate
+          // CVV is intentionally not stored
+        } : 
+        paymentDetails,
+      deliveryAddress
+    });
+    
+    const savedOrder = await newOrder.save();
+    
+    res.status(201).json({
+      message: "Order placed successfully",
+      orderId: savedOrder._id,
+      orderDate: savedOrder.orderDate,
+      status: savedOrder.status
+    });
+  } catch (error) {
+    console.error("Order creation error:", error);
+    res.status(500).json({ error: "Failed to place order. Please try again." });
+  }
+});
+
+// Get orders for a specific user
+router.get("/orders/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Validate user exists
+    const userExists = await User.findById(userId);
+    if (!userExists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    const orders = await Order.find({ userId }).sort({ orderDate: -1 });
+    res.json(orders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
+// Get a specific order by ID
+router.get("/order/:orderId", async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+    
+    res.json(order);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ error: "Failed to fetch order details" });
   }
 });
 

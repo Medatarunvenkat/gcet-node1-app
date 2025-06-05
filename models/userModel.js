@@ -1,9 +1,9 @@
-import mongoose from 'mongoose'
-const userSchema = mongoose.Schema({
-  name: { type: String },
-  email: { type: String },
-  pass: { type: String },
-});
-// const user = mongoose.model("User", userSchema);
+import mongoose from 'mongoose';
 
-export default mongoose.model("User", userSchema);
+// This file is kept for backward compatibility
+// The actual User model is now defined in userRoutes.js
+
+// Reference the existing User model
+const User = mongoose.model("User");
+
+export default User;

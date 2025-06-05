@@ -1,7 +1,9 @@
-import mongoose from 'mongoose'
-const orderSchema = mongoose.Schema({
-    email:{type:String},
-    orderValue:{type:Number}
-});
+import mongoose from 'mongoose';
 
-export default mongoose.model("Order", orderSchema);
+// This file is kept for backward compatibility
+// The actual Order model is now defined in userRoutes.js
+
+// Reference the existing Order model
+const Order = mongoose.model("Order");
+
+export default Order;
