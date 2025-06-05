@@ -13,7 +13,7 @@ userRouter.post("/login", async (req,res) => {
     const { email,pass } = req.body;
   const result = await userModel.findOne({email:email,pass:pass});
   if(result){
-    return res.json("user found");
+    return res.json(result);
   }
   else{
     return res
