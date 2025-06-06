@@ -118,7 +118,7 @@ const MONGODB_URI=process.env.MONGODB_URI
 
 app.use("/users", userRouter);
 app.use("/products", productRouter);
-app.use("/order",orderRouter);
+app.use("/orders",orderRouter);
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
