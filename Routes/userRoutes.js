@@ -1,34 +1,8 @@
-// import express from 'express'
-// import userModel from '../models/userModel.js'
-
-// const userRouter = express.Router();
-
-// userRouter.post("/register", async (req,res) => {
-//    const { name,email,pass } = req.body;
-//    const result = await userModel.insertOne({ name: name,email: email,pass: pass });
-//    return res.json(result);
-// });
-
-// userRouter.post("/login", async (req,res) => {
-//     const { email,pass } = req.body;
-//   const result = await userModel.findOne({email:email,pass:pass});
-//   if(result){
-//     return res.json(result);
-//   }
-//   else{
-//     return res
-//   }
-// });
-
-// userRouter.get("/:id", async (req,res) => {
-//   const email = req.params.id;
-//   const result = await userModel.findOne({email},{_id:0,name:1})
-//   return res.json(result);
-// });
-// export default userRouter
 import express from "express";
 import mongoose from "mongoose";
-
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+const SECRET_KEY = "tarun0909";
 const router = express.Router();
 
 // User Schema
@@ -44,7 +18,7 @@ const User = mongoose.model("User", userSchema);
 router.post("/register", async (req, res) => {
   try {
     const { name, email, pass } = req.body;
-    
+    const hashpassword = await bcrypt.hash(pass,10);
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -52,7 +26,7 @@ router.post("/register", async (req, res) => {
     }
     
     // Create new user
-    const newUser = new User({ name, email, pass });
+    const newUser = new User({ name, email, pass:hashpassword });
     const savedUser = await newUser.save();
     
     // Return success response (don't return password)
@@ -74,21 +48,28 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, pass } = req.body;
-    
-    // Find user with email and password
-    const user = await User.findOne({ email, pass });
-    
-    if (user) {
-      // Return user data (don't return password)
-      res.status(200).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        message: "Login Success"
-      });
-    } else {
-      res.status(401).json({ message: "Invalid email or password" });
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid email or password" });
     }
+    const token=jwt.sign({email:user.email,id:user._id},SECRET_KEY)
+    // Compare entered password with hashed password
+    const isMatch = await bcrypt.compare(pass, user.pass);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // Return user data (excluding password)
+    res.status(200).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      token:token,
+      message: "Login Success"
+
+    });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Login failed. Please try again." });
